@@ -132,7 +132,7 @@
     btn.addEventListener("click", () => {
       document.querySelectorAll(".play.playing").forEach(b => b.classList.remove("playing"));
       btn.classList.add("playing");
-      speakName(p.name);
+      speakPlace(p);
       setTimeout(() => btn.classList.remove("playing"), 1800);
     });
     list.appendChild(row);

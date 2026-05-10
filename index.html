@@ -251,7 +251,7 @@ function shuffle() {
 }
 
 function speak() {
-  speakName(PLACES[order[idx]].name);
+  speakPlace(PLACES[order[idx]]);
 }
 
 card.addEventListener("click", () => setFlipped(!flipped));
