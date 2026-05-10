@@ -398,8 +398,46 @@
     }[cc.toUpperCase()] || "en-US";
   }
 
-  // Default to using the typed name as the phonetic — English-friendly,
-  // matches how built-ins like "Dolomites" work. User can edit to add stress.
+  // Rough English syllabifier — produces respellings like "BOS-ton".
+  function syllabify(word) {
+    if (!word) return [];
+    const w = word.toLowerCase();
+    const isV = c => /[aeiouy]/.test(c);
+    const parts = [];
+    let i = 0;
+    while (i < w.length) {
+      const cstart = i;
+      while (i < w.length && !isV(w[i])) i++;
+      const cons = w.slice(cstart, i);
+      const vstart = i;
+      while (i < w.length && isV(w[i])) i++;
+      const vowels = w.slice(vstart, i);
+      if (vowels) parts.push(cons + vowels);
+      else if (cons) {
+        if (parts.length) parts[parts.length - 1] += cons;
+        else parts.push(cons);
+        break;
+      }
+    }
+    // VC|CV split: if next syllable starts with two+ consonants, move the first to the previous syllable.
+    for (let j = 0; j < parts.length - 1; j++) {
+      const m = parts[j + 1].match(/^([^aeiouy]+)([aeiouy].*)/);
+      if (m && m[1].length > 1) {
+        parts[j] += m[1][0];
+        parts[j + 1] = m[1].slice(1) + m[2];
+      }
+    }
+    return parts;
+  }
+
+  function autoStressPhonetic(name) {
+    return name.split(/\s+/).map(word => {
+      // Preserve original case of non-letters (apostrophes etc.)
+      const sylls = syllabify(word.replace(/[^a-zA-Z]/g, ""));
+      if (sylls.length < 2) return word;
+      return sylls.map((s, i) => i === 0 ? s.toUpperCase() : s).join("-");
+    }).join(" ");
+  }
 
   // ── Geocode lookup via Nominatim ──────────────────────────────────
   let pending = null;
@@ -424,9 +462,10 @@
       const cleanName = name.split(",")[0].trim();
       const country = COUNTRY_NAME[cc] || hit.address?.country || cc || "";
       const detectedLang = detectCountryLang(cc);
+      const phonetic = autoStressPhonetic(cleanName);
       pending = {
         name: cleanName,
-        phonetic: cleanName,
+        phonetic,
         lang: detectedLang,
         tips: [],
         lat: parseFloat(hit.lat),
@@ -437,7 +476,7 @@
       $("pv-flag").textContent = flagFor(cc);
       $("pv-name").textContent = cleanName;
       $("pv-loc").textContent = country;
-      $("pv-phonetic").value = cleanName;
+      $("pv-phonetic").value = phonetic;
       $("preview").classList.add("show");
       status.textContent = "";
     } catch (e) {
@@ -538,21 +577,25 @@
       del.addEventListener("click", async () => {
         if (!confirm(`Delete "${p.name}"?`)) return;
         del.disabled = true;
-        try {
-          if (usingWorker()) {
+        let workerOk = false;
+        if (usingWorker()) {
+          try {
             const { places } = await workerFetch("DELETE", { name: p.name });
             window.customPlaces = places;
-          } else {
-            const idx = customPlaces.findIndex(x => x.name === p.name);
-            if (idx !== -1) customPlaces.splice(idx, 1);
-            saveCustom(customPlaces);
+            workerOk = true;
+          } catch (e) {
+            // 404 (place wasn't in remote) or transient — still remove locally below.
+            console.warn("Worker delete failed:", e.message);
           }
-          rebuildPlaces();
-          renderLists();
-        } catch (e) {
-          alert("Delete failed: " + e.message);
-          del.disabled = false;
         }
+        if (!workerOk) {
+          const idx = customPlaces.findIndex(x => x.name === p.name);
+          if (idx !== -1) customPlaces.splice(idx, 1);
+        }
+        // Always strip from the localStorage shadow as well.
+        saveCustom(loadCustom().filter(x => x.name !== p.name));
+        rebuildPlaces();
+        renderLists();
       });
       actions.appendChild(del);
     } else {
