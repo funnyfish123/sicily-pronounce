@@ -104,6 +104,15 @@
     max-width: 90%;
     line-height: 1.4;
   }
+  .forvo {
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--muted);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--muted);
+    letter-spacing: 0.04em;
+  }
+  .forvo:hover { color: var(--accent); border-color: var(--accent); }
   .controls {
     display: flex;
     gap: 10px;
@@ -150,7 +159,7 @@
 <body>
 <header>
   <h1>Pronounce Sicily</h1>
-  <div class="sub">click the card to flip · press <kbd>Space</kbd> to flip · <kbd>→</kbd> next · <kbd>←</kbd> previous</div>
+  <div class="sub">press <kbd>Space</kbd> to hear it · click or <kbd>Enter</kbd> to flip · <kbd>→</kbd> next · <kbd>←</kbd> previous</div>
 </header>
 
 <div class="progress" id="progress">1 / 8</div>
@@ -165,6 +174,7 @@
       <p class="phonetic" id="phonetic">—</p>
       <div class="ipa" id="ipa"></div>
       <div class="note" id="note"></div>
+      <a class="forvo" id="forvo" target="_blank" rel="noopener">hear a local on Forvo →</a>
     </div>
   </div>
 </div>
@@ -243,6 +253,7 @@ function render() {
   $("phonetic").textContent = p.phonetic;
   $("ipa").textContent = p.ipa;
   $("note").textContent = p.note;
+  $("forvo").href = `https://forvo.com/word/${encodeURIComponent(p.name.toLowerCase().replace(/ /g, "_"))}/#it`;
   $("progress").textContent = `${idx + 1} / ${order.length}`;
   setFlipped(false);
 }
@@ -289,10 +300,12 @@ $("speak").addEventListener("click", e => { e.stopPropagation(); speak(); });
 $("shuffle").addEventListener("click", shuffle);
 
 document.addEventListener("keydown", e => {
-  if (e.key === " ") { e.preventDefault(); setFlipped(!flipped); }
+  const tag = (e.target && e.target.tagName) || "";
+  if (tag === "INPUT" || tag === "TEXTAREA") return;
+  if (e.key === " ") { e.preventDefault(); speak(); }
+  else if (e.key === "Enter") { e.preventDefault(); setFlipped(!flipped); }
   else if (e.key === "ArrowRight") next();
   else if (e.key === "ArrowLeft") prev();
-  else if (e.key.toLowerCase() === "s") speak();
 });
 
 if ("speechSynthesis" in window) {
