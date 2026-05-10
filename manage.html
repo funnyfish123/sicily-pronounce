@@ -318,10 +318,6 @@
             <option value="ja-JP">🇯🇵 Japanese</option>
           </select>
         </label>
-        <label>
-          Tips (one per line, optional)
-          <textarea id="pv-tips" placeholder="Stress on FLO.&#10;'c' before 'e' is a soft 's'."></textarea>
-        </label>
       </div>
       <div class="preview-actions">
         <button type="button" class="btn ghost" id="pv-cancel">Cancel</button>
@@ -442,7 +438,6 @@
       $("pv-name").textContent = cleanName;
       $("pv-loc").textContent = country;
       $("pv-phonetic").value = cleanName;
-      $("pv-tips").value = "";
       $("preview").classList.add("show");
       status.textContent = "";
     } catch (e) {
@@ -478,7 +473,7 @@
     if (!pending) return;
     pending.phonetic = $("pv-phonetic").value.trim() || pending.name;
     pending.lang = $("pv-lang").value || "en-US";
-    pending.tips = $("pv-tips").value.split("\n").map(s => s.trim()).filter(Boolean);
+    pending.tips = [];
     const saveBtn = $("pv-save");
     saveBtn.disabled = true;
     saveBtn.textContent = "Saving…";
