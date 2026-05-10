@@ -285,6 +285,21 @@
           <input id="pv-phonetic" type="text">
         </label>
         <label>
+          Voice (which language reads it aloud)
+          <select id="pv-lang">
+            <option value="en-US">🇬🇧 English</option>
+            <option value="it-IT">🇮🇹 Italian</option>
+            <option value="fr-FR">🇫🇷 French</option>
+            <option value="es-ES">🇪🇸 Spanish</option>
+            <option value="de-DE">🇩🇪 German</option>
+            <option value="de-CH">🇨🇭 Swiss German</option>
+            <option value="sl-SI">🇸🇮 Slovenian</option>
+            <option value="pt-PT">🇵🇹 Portuguese</option>
+            <option value="el-GR">🇬🇷 Greek</option>
+            <option value="ja-JP">🇯🇵 Japanese</option>
+          </select>
+        </label>
+        <label>
           Tips (one per line, optional)
           <textarea id="pv-tips" placeholder="Stress on FLO.&#10;'c' before 'e' is a soft 's'."></textarea>
         </label>
@@ -330,83 +345,8 @@
     }[cc.toUpperCase()] || "en-US";
   }
 
-  // ── Italian-aware phonetic generator ──────────────────────────────
-  function autoPhonetic(name, lang) {
-    const lp = (lang || "it-IT").toLowerCase();
-    if (lp.startsWith("it")) return italianPhonetic(name);
-    return name; // for other languages, leave for the user to refine
-  }
-
-  function italianPhonetic(name) {
-    return name.split(/(\s+)/).map(tok => {
-      if (/^\s+$/.test(tok)) return tok;
-      return convertItalianWord(tok);
-    }).join("");
-  }
-
-  function convertItalianWord(word) {
-    let s = word.toLowerCase();
-    let out = "";
-    let i = 0;
-    const isVowel = c => /[aeiou]/.test(c);
-    while (i < s.length) {
-      const c = s[i], n1 = s[i+1] || "", n2 = s[i+2] || "";
-      // 3-letter
-      if (c === "g" && n1 === "l" && n2 === "i") { out += "ly"; i += 3; continue; }
-      if (c === "s" && n1 === "c" && (n2 === "i" || n2 === "e")) {
-        out += n2 === "i" ? "shee" : "shay"; i += 3; continue;
-      }
-      // 2-letter
-      if (c === "g" && n1 === "n") { out += "ny"; i += 2; continue; }
-      if (c === "c" && n1 === "h") { out += "k"; i += 2; continue; }
-      if (c === "g" && n1 === "h") { out += "g"; i += 2; continue; }
-      if (c === "q" && n1 === "u") { out += "kw"; i += 2; continue; }
-      if (c === "c" && (n1 === "e" || n1 === "i")) {
-        out += n1 === "i" ? "chee" : "chay"; i += 2; continue;
-      }
-      if (c === "g" && (n1 === "e" || n1 === "i")) {
-        out += n1 === "i" ? "jee" : "jay"; i += 2; continue;
-      }
-      // doubled consonants — keep the doubling but render once + a hold marker is hard; just keep one
-      if (c === n1 && /[bcdfgklmnprstv]/.test(c)) { out += c + c; i += 2; continue; }
-      // 'i' before another vowel becomes a glide 'y'
-      if (c === "i" && isVowel(n1)) { out += "y"; i++; continue; }
-      // single letters
-      if (c === "a") out += "ah";
-      else if (c === "e") out += "ay";
-      else if (c === "i") out += "ee";
-      else if (c === "o") out += "oh";
-      else if (c === "u") out += "oo";
-      else if (c === "c") out += "k";
-      else if (c === "z") out += "ts";
-      else if (c === "h") {} // silent
-      else out += c;
-      i++;
-    }
-    return addStressMarker(out, word);
-  }
-
-  // Add naive stress marking: capitalize the penultimate "syllable-ish" group.
-  function addStressMarker(phon, originalWord) {
-    // Roughly count vowel groups in the converted phonetic.
-    const groups = phon.match(/[bcdfghjklmnpqrstvwxyz]*[aeiou]+/g) || [];
-    if (groups.length < 2) return phon;
-    const stressIdx = Math.max(0, groups.length - 2);
-    // Reconstruct with hyphens between groups, and uppercase the stressed one.
-    let pos = 0;
-    const parts = [];
-    let remaining = phon;
-    for (let i = 0; i < groups.length; i++) {
-      const g = groups[i];
-      const at = remaining.indexOf(g, pos);
-      if (at === -1) break;
-      parts.push(remaining.slice(pos, at));
-      parts.push(i === stressIdx ? g.toUpperCase() : g);
-      pos = at + g.length;
-    }
-    parts.push(remaining.slice(pos));
-    return parts.filter(Boolean).join("-").replace(/-+/g, "-").replace(/^-|-$/g, "");
-  }
+  // Default to using the typed name as the phonetic — English-friendly,
+  // matches how built-ins like "Dolomites" work. User can edit to add stress.
 
   // ── Geocode lookup via Nominatim ──────────────────────────────────
   let pending = null;
@@ -428,23 +368,22 @@
       }
       const hit = data[0];
       const cc = (hit.address && (hit.address.country_code || "")).toUpperCase();
-      const lang = detectCountryLang(cc);
       const cleanName = name.split(",")[0].trim();
-      const phonetic = autoPhonetic(cleanName, lang);
       const country = COUNTRY_NAME[cc] || hit.address?.country || cc || "";
       pending = {
         name: cleanName,
-        phonetic,
-        lang,
+        phonetic: cleanName,
+        lang: "en-US",
         tips: [],
         lat: parseFloat(hit.lat),
         lng: parseFloat(hit.lon),
         country: cc
       };
+      $("pv-lang").value = "en-US";
       $("pv-flag").textContent = flagFor(cc);
       $("pv-name").textContent = cleanName;
       $("pv-loc").textContent = country;
-      $("pv-phonetic").value = phonetic;
+      $("pv-phonetic").value = cleanName;
       $("pv-tips").value = "";
       $("preview").classList.add("show");
       status.textContent = "";
@@ -470,6 +409,7 @@
   $("pv-save").addEventListener("click", () => {
     if (!pending) return;
     pending.phonetic = $("pv-phonetic").value.trim() || pending.name;
+    pending.lang = $("pv-lang").value || "en-US";
     pending.tips = $("pv-tips").value.split("\n").map(s => s.trim()).filter(Boolean);
     const list = loadCustom();
     list.push(pending);
