@@ -264,7 +264,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="places.js"></script>
 <script>
-let order = PLACES.map((_, i) => i);
+let order = [];
 let idx = 0;
 let flipped = false;
 
@@ -345,8 +345,11 @@ document.addEventListener("keydown", e => {
   else if (e.key === "ArrowLeft") prev();
 });
 
-render();
-setTimeout(() => map.invalidateSize(), 100);
+placesReady.then(() => {
+  order = PLACES.map((_, i) => i);
+  render();
+  setTimeout(() => map.invalidateSize(), 100);
+});
 </script>
 </body>
 </html>

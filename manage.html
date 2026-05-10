@@ -153,6 +153,24 @@
   .preview .pv-flag { font-size: 28px; }
   .preview .pv-name { font-size: clamp(20px, 1.8vw, 26px); font-weight: 600; }
   .preview .pv-loc { color: var(--muted); font-size: 13px; margin-left: auto; }
+  .pv-play, .row-play {
+    font: inherit;
+    font-size: 16px;
+    background: var(--accent);
+    color: #fffdf6;
+    border: none;
+    border-radius: 999px;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(217,120,36,0.3);
+    transition: transform 0.1s ease, background 0.2s ease;
+  }
+  .pv-play:hover, .row-play:hover { background: var(--pop); transform: translateY(-1px); }
+  .pv-play.playing, .row-play.playing { background: var(--sea); }
   .preview .pv-row { display: grid; grid-template-columns: 1fr; gap: 8px; }
   .preview label { margin: 0; }
 
@@ -278,6 +296,7 @@
         <span class="pv-flag" id="pv-flag">🏳️</span>
         <span class="pv-name" id="pv-name">—</span>
         <span class="pv-loc" id="pv-loc"></span>
+        <button type="button" class="pv-play" id="pv-test" aria-label="Test pronunciation">▶</button>
       </div>
       <div class="pv-row">
         <label>
@@ -331,17 +350,39 @@
   const $ = id => document.getElementById(id);
 
   function detectCountryLang(cc) {
-    if (!cc) return "it-IT";
+    if (!cc) return "en-US";
     return {
+      // Italian
       IT: "it-IT", SM: "it-IT", VA: "it-IT",
-      CH: "de-CH", DE: "de-DE", AT: "de-DE",
-      FR: "fr-FR", ES: "es-ES", PT: "pt-PT",
-      SI: "sl-SI", GR: "el-GR",
-      MT: "en-US", GB: "en-US", IE: "en-US", US: "en-US", CA: "en-US",
-      JP: "ja-JP", CN: "zh-CN", KR: "ko-KR",
-      NL: "nl-NL", BE: "nl-NL", DK: "da-DK", SE: "sv-SE", NO: "nb-NO", FI: "fi-FI",
-      PL: "pl-PL", CZ: "cs-CZ", HU: "hu-HU", RO: "ro-RO", HR: "hr-HR",
-      TR: "tr-TR", IL: "he-IL", IN: "hi-IN"
+      // German
+      DE: "de-DE", AT: "de-DE", CH: "de-CH", LI: "de-DE",
+      // French
+      FR: "fr-FR", LU: "fr-FR", MC: "fr-FR",
+      // Spanish (incl. Latin America)
+      ES: "es-ES",
+      MX: "es-MX", AR: "es-AR", CO: "es-CO", CL: "es-CL", PE: "es-PE",
+      VE: "es-VE", EC: "es-EC", BO: "es-BO", PY: "es-PY", UY: "es-UY",
+      GT: "es-GT", CU: "es-CU", DO: "es-DO", HN: "es-HN", NI: "es-NI",
+      PA: "es-PA", SV: "es-SV", CR: "es-CR", PR: "es-PR",
+      // Portuguese
+      PT: "pt-PT", BR: "pt-BR",
+      // Slavic
+      SI: "sl-SI", PL: "pl-PL", CZ: "cs-CZ", SK: "sk-SK",
+      HR: "hr-HR", RS: "sr-RS", BG: "bg-BG", UA: "uk-UA", RU: "ru-RU",
+      // Greek / Turkish / Hebrew / Arabic
+      GR: "el-GR", TR: "tr-TR", IL: "he-IL",
+      EG: "ar-EG", SA: "ar-SA", AE: "ar-SA", MA: "ar-MA",
+      // Asian
+      JP: "ja-JP", CN: "zh-CN", TW: "zh-TW", HK: "zh-HK",
+      KR: "ko-KR", TH: "th-TH", VN: "vi-VN", ID: "id-ID", MY: "ms-MY",
+      IN: "hi-IN",
+      // Nordic / Other European
+      NL: "nl-NL", BE: "nl-BE",
+      DK: "da-DK", SE: "sv-SE", NO: "nb-NO", FI: "fi-FI", IS: "is-IS",
+      HU: "hu-HU", RO: "ro-RO",
+      // English-speaking
+      MT: "en-US", GB: "en-GB", IE: "en-IE", US: "en-US",
+      CA: "en-CA", AU: "en-AU", NZ: "en-NZ", ZA: "en-ZA"
     }[cc.toUpperCase()] || "en-US";
   }
 
@@ -370,16 +411,17 @@
       const cc = (hit.address && (hit.address.country_code || "")).toUpperCase();
       const cleanName = name.split(",")[0].trim();
       const country = COUNTRY_NAME[cc] || hit.address?.country || cc || "";
+      const detectedLang = detectCountryLang(cc);
       pending = {
         name: cleanName,
         phonetic: cleanName,
-        lang: "en-US",
+        lang: detectedLang,
         tips: [],
         lat: parseFloat(hit.lat),
         lng: parseFloat(hit.lon),
         country: cc
       };
-      $("pv-lang").value = "en-US";
+      $("pv-lang").value = detectedLang;
       $("pv-flag").textContent = flagFor(cc);
       $("pv-name").textContent = cleanName;
       $("pv-loc").textContent = country;
@@ -400,6 +442,16 @@
     if (e.key === "Enter") { e.preventDefault(); autofill(); }
   });
 
+  $("pv-test").addEventListener("click", () => {
+    if (!pending) return;
+    const phon = $("pv-phonetic").value.trim() || pending.name;
+    const lang = $("pv-lang").value || pending.lang || "en-US";
+    const btn = $("pv-test");
+    btn.classList.add("playing");
+    speakName(phon.replace(/-/g, " "), lang);
+    setTimeout(() => btn.classList.remove("playing"), 1500);
+  });
+
   $("pv-cancel").addEventListener("click", () => {
     pending = null;
     $("preview").classList.remove("show");
@@ -411,9 +463,9 @@
     pending.phonetic = $("pv-phonetic").value.trim() || pending.name;
     pending.lang = $("pv-lang").value || "en-US";
     pending.tips = $("pv-tips").value.split("\n").map(s => s.trim()).filter(Boolean);
-    const list = loadCustom();
-    list.push(pending);
-    saveCustom(list);
+    customPlaces.push(pending);
+    saveCustom(customPlaces); // local fallback for re-load
+    rebuildPlaces();
     pending = null;
     $("preview").classList.remove("show");
     $("f-name").value = "";
@@ -438,13 +490,30 @@
     li.querySelector(".pl-name").textContent = p.name;
     li.querySelector(".pl-phon").textContent = p.phonetic;
     const actions = li.querySelector(".pl-actions");
+
+    const playBtn = document.createElement("button");
+    playBtn.className = "row-play";
+    playBtn.textContent = "▶";
+    playBtn.setAttribute("aria-label", `Play ${p.name}`);
+    playBtn.addEventListener("click", e => {
+      e.stopPropagation();
+      document.querySelectorAll(".row-play.playing").forEach(b => b.classList.remove("playing"));
+      playBtn.classList.add("playing");
+      speakPlace(p);
+      setTimeout(() => playBtn.classList.remove("playing"), 1500);
+    });
+    actions.appendChild(playBtn);
+
     if (opts.custom) {
       const del = document.createElement("button");
       del.className = "danger";
       del.textContent = "Delete";
       del.addEventListener("click", () => {
         if (!confirm(`Delete "${p.name}"?`)) return;
-        saveCustom(loadCustom().filter(x => x.name !== p.name));
+        const idx = customPlaces.findIndex(x => x.name === p.name);
+        if (idx !== -1) customPlaces.splice(idx, 1);
+        saveCustom(customPlaces);
+        rebuildPlaces();
         renderLists();
       });
       actions.appendChild(del);
@@ -456,6 +525,7 @@
         if (opts.hidden) list = list.filter(n => n !== p.name);
         else list.push(p.name);
         saveHidden(list);
+        rebuildPlaces();
         renderLists();
       });
       actions.appendChild(btn);
@@ -468,22 +538,21 @@
     const defaultEl = $("default-list");
     customEl.innerHTML = "";
     defaultEl.innerHTML = "";
-    const custom = loadCustom();
     const hidden = new Set(loadHidden());
-    if (!custom.length) {
+    if (!customPlaces.length) {
       customEl.innerHTML = '<li class="empty">No custom flashcards yet — add one above.</li>';
     } else {
-      custom.forEach(p => customEl.appendChild(placeRow(p, { custom: true })));
+      customPlaces.forEach(p => customEl.appendChild(placeRow(p, { custom: true })));
     }
     DEFAULT_PLACES.forEach(p => defaultEl.appendChild(placeRow(p, { custom: false, hidden: hidden.has(p.name) })));
     const visibleDefaults = DEFAULT_PLACES.length - hidden.size;
     $("default-summary").textContent = `Built-in flashcards (${visibleDefaults} of ${DEFAULT_PLACES.length} visible)`;
-    $("custom-help").textContent = custom.length
-      ? `${custom.length} custom flashcard${custom.length === 1 ? "" : "s"}.`
+    $("custom-help").textContent = customPlaces.length
+      ? `${customPlaces.length} custom flashcard${customPlaces.length === 1 ? "" : "s"}.`
       : "Anything you've added shows up here.";
   }
 
-  renderLists();
+  placesReady.then(renderLists);
 </script>
 </body>
 </html>

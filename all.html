@@ -189,6 +189,10 @@
   const markers = [];
   const rows = [];
 
+  placesReady.then(initAll);
+
+  function initAll() {
+
   function play(i) {
     const p = PLACES[i];
     const btn = rows[i].querySelector(".play");
@@ -241,6 +245,8 @@
   // Fit to all markers on initial load.
   const bounds = L.latLngBounds(PLACES.map(p => [p.lat, p.lng]));
   map.fitBounds(bounds, { padding: [30, 30] });
+
+  } // end initAll
 </script>
 </body>
 </html>
