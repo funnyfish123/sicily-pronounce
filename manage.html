@@ -347,7 +347,23 @@
 
 <script src="places.js"></script>
 <script>
+  // Set this after deploying the Cloudflare Worker (see worker/DEPLOY.md).
+  // Empty string = saves stay on this device only.
+  const WORKER_URL = "";
+
   const $ = id => document.getElementById(id);
+  const usingWorker = () => !!WORKER_URL;
+
+  async function workerFetch(method, body) {
+    const r = await fetch(`${WORKER_URL}/places`, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(data.error || `HTTP ${r.status}`);
+    return data;
+  }
 
   function detectCountryLang(cc) {
     if (!cc) return "en-US";
@@ -458,19 +474,35 @@
     $("f-name").value = "";
     $("geo-status").textContent = "";
   });
-  $("pv-save").addEventListener("click", () => {
+  $("pv-save").addEventListener("click", async () => {
     if (!pending) return;
     pending.phonetic = $("pv-phonetic").value.trim() || pending.name;
     pending.lang = $("pv-lang").value || "en-US";
     pending.tips = $("pv-tips").value.split("\n").map(s => s.trim()).filter(Boolean);
-    customPlaces.push(pending);
-    saveCustom(customPlaces); // local fallback for re-load
-    rebuildPlaces();
-    pending = null;
-    $("preview").classList.remove("show");
-    $("f-name").value = "";
-    $("geo-status").textContent = "";
-    renderLists();
+    const saveBtn = $("pv-save");
+    saveBtn.disabled = true;
+    saveBtn.textContent = "Saving…";
+    try {
+      if (usingWorker()) {
+        const { places } = await workerFetch("POST", pending);
+        window.customPlaces = places;
+      } else {
+        customPlaces.push(pending);
+        saveCustom(customPlaces);
+      }
+      rebuildPlaces();
+      pending = null;
+      $("preview").classList.remove("show");
+      $("f-name").value = "";
+      $("geo-status").textContent = "";
+      renderLists();
+    } catch (e) {
+      $("geo-status").textContent = "Save failed: " + e.message;
+      $("geo-status").className = "geo-status err";
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = "Save flashcard";
+    }
   });
 
   // ── Render lists ──────────────────────────────────────────────────
@@ -508,13 +540,24 @@
       const del = document.createElement("button");
       del.className = "danger";
       del.textContent = "Delete";
-      del.addEventListener("click", () => {
+      del.addEventListener("click", async () => {
         if (!confirm(`Delete "${p.name}"?`)) return;
-        const idx = customPlaces.findIndex(x => x.name === p.name);
-        if (idx !== -1) customPlaces.splice(idx, 1);
-        saveCustom(customPlaces);
-        rebuildPlaces();
-        renderLists();
+        del.disabled = true;
+        try {
+          if (usingWorker()) {
+            const { places } = await workerFetch("DELETE", { name: p.name });
+            window.customPlaces = places;
+          } else {
+            const idx = customPlaces.findIndex(x => x.name === p.name);
+            if (idx !== -1) customPlaces.splice(idx, 1);
+            saveCustom(customPlaces);
+          }
+          rebuildPlaces();
+          renderLists();
+        } catch (e) {
+          alert("Delete failed: " + e.message);
+          del.disabled = false;
+        }
       });
       actions.appendChild(del);
     } else {
