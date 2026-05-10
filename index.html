@@ -216,7 +216,7 @@
 <body>
 <header>
   <h1>Pronounce</h1>
-  <div class="sub"><kbd>Space</kbd> hear · click or <kbd>Enter</kbd> flip · <kbd>→</kbd> next · <kbd>←</kbd> prev</div>
+  <div class="sub"><kbd>Space</kbd> hear · <kbd>↑</kbd> flip · <kbd>→</kbd> next · <kbd>←</kbd> prev</div>
   <nav class="nav"><a href="all.html">see all places →</a></nav>
 </header>
 
@@ -317,7 +317,7 @@ document.addEventListener("keydown", e => {
   const tag = (e.target && e.target.tagName) || "";
   if (tag === "INPUT" || tag === "TEXTAREA") return;
   if (e.key === " ") { e.preventDefault(); speak(); }
-  else if (e.key === "Enter") { e.preventDefault(); setFlipped(!flipped); }
+  else if (e.key === "ArrowUp" || e.key === "Enter") { e.preventDefault(); setFlipped(!flipped); }
   else if (e.key === "ArrowRight") next();
   else if (e.key === "ArrowLeft") prev();
 });
