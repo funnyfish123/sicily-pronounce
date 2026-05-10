@@ -144,15 +144,6 @@
     max-width: 90%;
     line-height: 1.4;
   }
-  .forvo {
-    margin-top: 14px;
-    font-size: 12px;
-    color: var(--muted);
-    text-decoration: none;
-    border-bottom: 1px dotted var(--muted);
-    letter-spacing: 0.04em;
-  }
-  .forvo:hover { color: var(--accent); border-color: var(--accent); }
 
   #mini-map {
     width: min(1100px, 94vw);
@@ -245,7 +236,6 @@
       <p class="phonetic" id="phonetic">—</p>
       <div class="ipa" id="ipa"></div>
       <div class="note" id="note"></div>
-      <a class="forvo" id="forvo" target="_blank" rel="noopener">hear a local on Forvo →</a>
     </div>
   </div>
 </div>
@@ -294,7 +284,6 @@ function render() {
   $("flag2").textContent = COUNTRY_FLAG[p.country] || "🏳️";
   $("country").textContent = COUNTRY_NAME[p.country] || "";
   $("country2").textContent = COUNTRY_NAME[p.country] || "";
-  $("forvo").href = `https://forvo.com/word/${encodeURIComponent(p.name.toLowerCase().replace(/ /g, "_"))}/#${(p.lang || "it").slice(0,2)}`;
   $("progress").textContent = `${idx + 1} / ${order.length}`;
   setFlipped(false);
   marker.setLatLng([p.lat, p.lng]);
