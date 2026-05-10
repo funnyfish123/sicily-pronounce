@@ -56,14 +56,33 @@
   }
   .nav a:hover { color: var(--ink); border-color: var(--ink); }
 
-  #big-map {
+  .layout {
     width: min(1280px, 96vw);
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+  #big-map {
+    width: 100%;
     height: clamp(320px, 55vh, 720px);
     border-radius: 20px;
     box-shadow: 0 22px 44px rgba(14,58,107,0.2);
     overflow: hidden;
-    margin-bottom: 22px;
     background: #cfe3e0;
+  }
+  @media (min-width: 900px) {
+    .layout {
+      width: min(1400px, 96vw);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+    #big-map {
+      height: clamp(420px, 78vh, 820px);
+      position: sticky;
+      top: 20px;
+    }
   }
   .leaflet-container { font-family: inherit; }
   .pin {
@@ -82,7 +101,7 @@
   }
 
   .list {
-    width: min(1280px, 96vw);
+    width: 100%;
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -150,9 +169,10 @@
   <nav class="nav"><a href="index.html">← back to flashcards</a></nav>
 </header>
 
-<div id="big-map"></div>
-
-<div class="list" id="list"></div>
+<div class="layout">
+  <div id="big-map"></div>
+  <div class="list" id="list"></div>
+</div>
 
 <footer>Italian, English, German, &amp; Slovenian voices via your browser.</footer>
 
@@ -195,7 +215,13 @@
       setTimeout(() => btn.classList.remove("playing"), 1800);
       focus(i);
     });
-    row.addEventListener("click", () => { focus(i); });
+    row.addEventListener("click", () => {
+      document.querySelectorAll(".play.playing").forEach(b => b.classList.remove("playing"));
+      btn.classList.add("playing");
+      speakPlace(p);
+      setTimeout(() => btn.classList.remove("playing"), 1800);
+      focus(i);
+    });
     list.appendChild(row);
     rows.push(row);
   });

@@ -145,12 +145,17 @@
     font-size: 14px;
     margin-bottom: 14px;
   }
-  .note {
-    font-size: 14px;
+  .tips {
+    font-size: clamp(15px, 1.7vw, 19px);
     color: var(--ink);
+    line-height: 1.45;
+    margin: 6px 0 0;
+    padding-left: 1.4em;
+    text-align: left;
     max-width: 90%;
-    line-height: 1.4;
   }
+  .tips li { margin: 6px 0; }
+  .tips li::marker { color: var(--accent); }
 
   #mini-map {
     width: min(1100px, 94vw);
@@ -242,7 +247,7 @@
       <span class="country" id="country2">—</span>
       <span class="flag" id="flag2">🏳️</span>
       <div class="ipa" id="ipa"></div>
-      <div class="note" id="note"></div>
+      <ul class="tips" id="tips"></ul>
     </div>
   </div>
 </div>
@@ -293,7 +298,13 @@ function render() {
   $("place").textContent = p.name;
   $("phonetic").innerHTML = styleStress(p.phonetic);
   $("ipa").textContent = p.ipa || "";
-  $("note").textContent = p.note || "";
+  const tipsEl = $("tips");
+  tipsEl.innerHTML = "";
+  (p.tips || []).forEach(t => {
+    const li = document.createElement("li");
+    li.textContent = t;
+    tipsEl.appendChild(li);
+  });
   $("flag").textContent = COUNTRY_FLAG[p.country] || "🏳️";
   $("flag2").textContent = COUNTRY_FLAG[p.country] || "🏳️";
   $("country").textContent = COUNTRY_NAME[p.country] || "";
