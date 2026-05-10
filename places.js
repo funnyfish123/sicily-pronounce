@@ -26,14 +26,14 @@ const PLACES = [
     note: "Open 'e' in the middle — pah-LAIR-moh, not pah-LURR-moh." },
 
   // ── Malta ───────────────────────────────────────────────────────────
-  { name: "Luqa", speak: "Lua", lang: "mt-MT", phonetic: "LOO-ah",
-    note: "Maltese 'q' is a silent glottal stop — there's a tiny catch in the throat where the q is, but no consonant sound. Two syllables: LOO-ah." },
-  { name: "Valletta", lang: "mt-MT", phonetic: "vah-LET-tah", ipa: "/vəˈlɛttə/",
-    note: "Italian-style stress on LET. Doubled 't' is geminated — held a beat longer." },
-  { name: "Mdina", speak: "Imdina", lang: "mt-MT", phonetic: "im-DEE-nah",
-    note: "The leading 'M-D' isn't silent — it's a faint 'im-' before the 'DEE-nah'. Like quietly humming the M before the rest." },
-  { name: "Rabat", lang: "mt-MT", phonetic: "rah-BAT",
-    note: "Two short syllables, mild stress on the second. The 'a' is open: rah-BAHT." },
+  { name: "Luqa", lang: "en-US", phonetic: "LOO-kuh",
+    note: "Common anglicized form: LOO-kuh. (Locals soften the 'q' to a glottal stop, but you don't need to.)" },
+  { name: "Valletta", lang: "en-US", phonetic: "vuh-LET-uh",
+    note: "Two beats on the LET. Capital of Malta." },
+  { name: "Mdina", lang: "en-US", phonetic: "em-DEE-nah",
+    note: "Pronounced as if it starts with a quick 'em-': em-DEE-nah." },
+  { name: "Rabat", lang: "en-US", phonetic: "rah-BAHT",
+    note: "Two short syllables, light stress on the second." },
 
   // ── Puglia / Basilicata ─────────────────────────────────────────────
   { name: "Polignano a Mare", lang: "it-IT", phonetic: "poh-leen-YAH-noh ah MAH-reh",
@@ -60,8 +60,8 @@ const PLACES = [
     note: "Three syllables in Italian: pom-PAY-ee. The 'ei' is two vowels, not one." },
   { name: "Circumvesuviana", lang: "it-IT", phonetic: "cheer-koom-veh-zoo-vee-AH-nah",
     note: "Six-syllable mouthful for the train along the Vesuvius coast. Italian 'c' before 'i' = 'ch' sound. Break it: cheer-koom-veh-zoo-vee-AH-nah." },
-  { name: "Naples", speak: "Napoli", lang: "it-IT", phonetic: "NAH-poh-lee", ipa: "/ˈnaːpoli/",
-    note: "Locals say Napoli — three syllables, stress on the FIRST. Not nah-POH-lee." },
+  { name: "Naples", lang: "en-US", phonetic: "NAY-pulls",
+    note: "Just the English name — NAY-pulls." },
 
   // ── Central Italy ───────────────────────────────────────────────────
   { name: "Bologna", lang: "it-IT", phonetic: "boh-LOHN-yah", ipa: "/boˈloɲɲa/",
@@ -96,14 +96,14 @@ const PLACES = [
     note: "Four syllables. The peninsula on Lake Garda." },
   { name: "Verona", lang: "it-IT", phonetic: "veh-ROH-nah",
     note: "Three even syllables, stress on ROH." },
-  { name: "Dolomites", speak: "Dolomiti", lang: "it-IT", phonetic: "doh-loh-MEE-tee",
-    note: "Italian name is Dolomiti. Stress on MEE." },
+  { name: "Dolomites", lang: "en-US", phonetic: "DOL-uh-mites",
+    note: "English form: DOL-uh-mites, three syllables, stress on the first." },
 
   // ── Slovenia / Trieste ──────────────────────────────────────────────
-  { name: "Lake Bled", speak: "Bled", lang: "sl-SI", phonetic: "BLED",
-    note: "Just one syllable in Slovenian — 'BLED', short and clipped. The lake is Blejsko jezero." },
-  { name: "Ljubljana", lang: "sl-SI", phonetic: "lyoo-BLYAH-nah", ipa: "/ljuˈbljaːna/",
-    note: "The 'Lj' is a palatal 'ly', like the 'lli' in 'million'. So: lyoo-BLYAH-nah, not loo-bul-JAH-nah." },
+  { name: "Lake Bled", lang: "en-US", phonetic: "layk BLED",
+    note: "'Bled' is one syllable, short and clipped — rhymes with 'red'." },
+  { name: "Ljubljana", lang: "en-US", phonetic: "loob-lee-AH-nah",
+    note: "Common English approximation: loob-lee-AH-nah. The 'Lj' just sounds like a regular 'L'." },
   { name: "Trieste", lang: "it-IT", phonetic: "tree-ES-teh", ipa: "/triˈɛste/",
     note: "Three syllables, open 'e' in ES. Italian port on the Slovenian border." },
 
@@ -116,8 +116,8 @@ const PLACES = [
     note: "Both 'w's are 'v's: VIL-ders-vil. Junction below the Jungfrau." },
   { name: "Sunnegga", lang: "de-CH", phonetic: "SOON-eg-gah",
     note: "Swiss German diminutive — 'little sun corner'. Funicular above Zermatt. Doubled 'g' held a beat." },
-  { name: "Zürich", speak: "Zürich", lang: "de-CH", phonetic: "TSOO-rikh", ipa: "/ˈtsyːrɪç/",
-    note: "Locals say TSOO-rikh — the 'Z' is 'ts' and the final 'ch' is the throaty back-of-throat sound (like Bach). The English 'ZUR-ick' is fine for tourists." }
+  { name: "Zurich", lang: "en-US", phonetic: "ZOOR-ick",
+    note: "ZOOR-ick — two syllables, stress on the first. (The German 'Zürich' is more like TSOO-rikh, but you don't need that.)" }
 ];
 
 const FALLBACK_LANG_PREFIX = { mt: "it" };
