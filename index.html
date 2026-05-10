@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Andiamo · pronounce as you go</title>
+<title>Pronounce</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&display=swap" rel="stylesheet">
@@ -226,8 +226,7 @@
 </head>
 <body>
 <header>
-  <h1>Andiamo</h1>
-  <div class="tagline">pronounce as you go</div>
+  <h1>Pronounce</h1>
   <div class="sub"><kbd>Space</kbd> hear · click or <kbd>Enter</kbd> flip · <kbd>→</kbd> next · <kbd>←</kbd> prev</div>
   <nav class="nav"><a href="all.html">see all places →</a></nav>
 </header>
@@ -275,12 +274,12 @@ const $ = id => document.getElementById(id);
 const card = $("card");
 
 const map = L.map("mini-map", {
-  zoomControl: false,
+  zoomControl: true,
   attributionControl: false,
-  scrollWheelZoom: false,
+  scrollWheelZoom: true,
   dragging: true,
-  doubleClickZoom: false,
-}).setView([42, 13], 5);
+  doubleClickZoom: true,
+}).setView([42, 13], 4);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   maxZoom: 18,
 }).addTo(map);
@@ -301,7 +300,7 @@ function render() {
   $("progress").textContent = `${idx + 1} / ${order.length}`;
   setFlipped(false);
   marker.setLatLng([p.lat, p.lng]);
-  map.flyTo([p.lat, p.lng], 7, { duration: 0.7 });
+  map.flyTo([p.lat, p.lng], 11, { duration: 1.6 });
 }
 
 function setFlipped(v) {

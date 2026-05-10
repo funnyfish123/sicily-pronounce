@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>All places · Andiamo</title>
+<title>All places · Pronounce</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&display=swap" rel="stylesheet">
@@ -147,7 +147,7 @@
 </head>
 <body>
 <header>
-  <h1>Andiamo</h1>
+  <h1>Pronounce</h1>
   <div class="tagline">all places · click a row to fly there</div>
   <nav class="nav"><a href="index.html">← back to flashcards</a></nav>
 </header>
@@ -211,7 +211,7 @@
       const pin = el.querySelector(".pin");
       if (pin) pin.classList.add("active");
     }
-    map.flyTo([PLACES[i].lat, PLACES[i].lng], 8, { duration: 0.7 });
+    map.flyTo([PLACES[i].lat, PLACES[i].lng], 11, { duration: 1.6 });
     rows[i].scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
 
