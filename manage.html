@@ -461,18 +461,17 @@
       const cc = (hit.address && (hit.address.country_code || "")).toUpperCase();
       const cleanName = name.split(",")[0].trim();
       const country = COUNTRY_NAME[cc] || hit.address?.country || cc || "";
-      const detectedLang = detectCountryLang(cc);
       const phonetic = autoStressPhonetic(cleanName);
       pending = {
         name: cleanName,
         phonetic,
-        lang: detectedLang,
+        lang: "en-US",
         tips: [],
         lat: parseFloat(hit.lat),
         lng: parseFloat(hit.lon),
         country: cc
       };
-      $("pv-lang").value = detectedLang;
+      $("pv-lang").value = "en-US";
       $("pv-flag").textContent = flagFor(cc);
       $("pv-name").textContent = cleanName;
       $("pv-loc").textContent = country;
