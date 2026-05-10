@@ -3,10 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Pronounce Sicily</title>
+<title>Andiamo · pronounce as you go</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
 <style>
   :root {
     --bg: #f4ead0;
@@ -32,26 +33,43 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 32px 20px 60px;
-    min-height: 100%;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 24px 20px;
+    gap: 16px;
   }
-  header { text-align: center; margin-bottom: 18px; }
+  header { text-align: center; }
   h1 {
     margin: 0;
-    font-size: clamp(28px, 4vw, 40px);
-    letter-spacing: 0.02em;
+    font-size: clamp(34px, 5vw, 52px);
+    letter-spacing: 0.01em;
+    font-weight: 600;
+    font-style: italic;
+  }
+  .tagline {
+    color: var(--muted);
+    font-style: italic;
+    margin-top: 2px;
+    font-size: 14px;
+    letter-spacing: 0.04em;
   }
   .sub {
     color: var(--muted);
-    font-style: italic;
-    margin-top: 6px;
-    font-size: 14px;
+    margin-top: 8px;
+    font-size: 13px;
   }
+  .nav { margin-top: 8px; font-size: 13px; }
+  .nav a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--accent);
+    letter-spacing: 0.04em;
+  }
+  .nav a:hover { color: var(--ink); border-color: var(--ink); }
   .progress {
     color: var(--muted);
     font-variant: small-caps;
     letter-spacing: 0.1em;
-    margin: 14px 0 18px;
     font-size: 13px;
   }
   .scene {
@@ -82,6 +100,23 @@
     text-align: center;
   }
   .face.back { transform: rotateY(180deg); }
+  .flag {
+    position: absolute;
+    top: 14px;
+    right: 18px;
+    font-size: 26px;
+    line-height: 1;
+    filter: drop-shadow(0 2px 4px rgba(14,58,107,0.18));
+  }
+  .country {
+    position: absolute;
+    top: 22px;
+    left: 18px;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
   .place {
     font-size: clamp(30px, 6vw, 52px);
     margin: 0;
@@ -90,8 +125,8 @@
   .hint {
     color: var(--muted);
     margin-top: 12px;
-    font-size: 13px;
-    letter-spacing: 0.08em;
+    font-size: 12px;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
   }
   .phonetic {
@@ -120,10 +155,33 @@
     letter-spacing: 0.04em;
   }
   .forvo:hover { color: var(--accent); border-color: var(--accent); }
+
+  #mini-map {
+    width: min(540px, 92vw);
+    height: 200px;
+    border-radius: 16px;
+    box-shadow: 0 14px 28px rgba(14,58,107,0.15);
+    overflow: hidden;
+    background: #cfe3e0;
+  }
+  .leaflet-container { font-family: inherit; }
+  .pin {
+    background: var(--accent);
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 3px solid #fffdf6;
+    box-shadow: 0 4px 10px rgba(217,120,36,0.5);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+  }
+
   .controls {
     display: flex;
     gap: 10px;
-    margin-top: 22px;
     flex-wrap: wrap;
     justify-content: center;
   }
@@ -151,21 +209,12 @@
   button:hover { transform: translateY(-1px); }
   button:active { transform: translateY(0); }
   footer {
-    margin-top: 28px;
     color: var(--muted);
     font-size: 12px;
     text-align: center;
   }
-  .nav { margin-top: 10px; font-size: 13px; }
-  .nav a {
-    color: var(--accent);
-    text-decoration: none;
-    border-bottom: 1px dotted var(--accent);
-    letter-spacing: 0.04em;
-  }
-  .nav a:hover { color: var(--ink); border-color: var(--ink); }
   kbd {
-    background: #fffaf2;
+    background: #fffdf6;
     border: 1px solid #d8c8b1;
     border-bottom-width: 2px;
     border-radius: 4px;
@@ -177,20 +226,25 @@
 </head>
 <body>
 <header>
-  <h1>Pronounce Sicily</h1>
-  <div class="sub">press <kbd>Space</kbd> to hear it · click or <kbd>Enter</kbd> to flip · <kbd>→</kbd> next · <kbd>←</kbd> previous</div>
+  <h1>Andiamo</h1>
+  <div class="tagline">pronounce as you go</div>
+  <div class="sub"><kbd>Space</kbd> hear · click or <kbd>Enter</kbd> flip · <kbd>→</kbd> next · <kbd>←</kbd> prev</div>
   <nav class="nav"><a href="all.html">see all places →</a></nav>
 </header>
 
-<div class="progress" id="progress">1 / 8</div>
+<div class="progress" id="progress">1 / 1</div>
 
 <div class="scene">
   <div class="card" id="card">
     <div class="face front">
+      <span class="country" id="country">—</span>
+      <span class="flag" id="flag">🏳️</span>
       <h2 class="place" id="place">—</h2>
       <div class="hint">tap to reveal</div>
     </div>
     <div class="face back">
+      <span class="country" id="country2">—</span>
+      <span class="flag" id="flag2">🏳️</span>
       <p class="phonetic" id="phonetic">—</p>
       <div class="ipa" id="ipa"></div>
       <div class="note" id="note"></div>
@@ -199,6 +253,8 @@
   </div>
 </div>
 
+<div id="mini-map"></div>
+
 <div class="controls">
   <button class="ghost" id="prev">← Prev</button>
   <button class="accent" id="speak">🔊 Hear it</button>
@@ -206,8 +262,9 @@
   <button class="ghost" id="shuffle">Shuffle</button>
 </div>
 
-<footer>Italian pronunciation. Audio uses your browser's Italian voice when available.</footer>
+<footer>Italian, English, German, &amp; Slovenian voices via your browser.</footer>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="places.js"></script>
 <script>
 let order = PLACES.map((_, i) => i);
@@ -217,15 +274,34 @@ let flipped = false;
 const $ = id => document.getElementById(id);
 const card = $("card");
 
+const map = L.map("mini-map", {
+  zoomControl: false,
+  attributionControl: false,
+  scrollWheelZoom: false,
+  dragging: true,
+  doubleClickZoom: false,
+}).setView([42, 13], 5);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  maxZoom: 18,
+}).addTo(map);
+const pinIcon = L.divIcon({ className: "", html: '<div class="pin"></div>', iconSize: [18, 18], iconAnchor: [9, 9] });
+const marker = L.marker([42, 13], { icon: pinIcon }).addTo(map);
+
 function render() {
   const p = PLACES[order[idx]];
   $("place").textContent = p.name;
   $("phonetic").textContent = p.phonetic;
-  $("ipa").textContent = p.ipa;
-  $("note").textContent = p.note;
-  $("forvo").href = `https://forvo.com/word/${encodeURIComponent(p.name.toLowerCase().replace(/ /g, "_"))}/#it`;
+  $("ipa").textContent = p.ipa || "";
+  $("note").textContent = p.note || "";
+  $("flag").textContent = COUNTRY_FLAG[p.country] || "🏳️";
+  $("flag2").textContent = COUNTRY_FLAG[p.country] || "🏳️";
+  $("country").textContent = COUNTRY_NAME[p.country] || "";
+  $("country2").textContent = COUNTRY_NAME[p.country] || "";
+  $("forvo").href = `https://forvo.com/word/${encodeURIComponent(p.name.toLowerCase().replace(/ /g, "_"))}/#${(p.lang || "it").slice(0,2)}`;
   $("progress").textContent = `${idx + 1} / ${order.length}`;
   setFlipped(false);
+  marker.setLatLng([p.lat, p.lng]);
+  map.flyTo([p.lat, p.lng], 7, { duration: 0.7 });
 }
 
 function setFlipped(v) {
@@ -233,14 +309,8 @@ function setFlipped(v) {
   card.classList.toggle("flipped", flipped);
 }
 
-function next() {
-  idx = (idx + 1) % order.length;
-  render();
-}
-function prev() {
-  idx = (idx - 1 + order.length) % order.length;
-  render();
-}
+function next() { idx = (idx + 1) % order.length; render(); }
+function prev() { idx = (idx - 1 + order.length) % order.length; render(); }
 function shuffle() {
   for (let i = order.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -249,10 +319,7 @@ function shuffle() {
   idx = 0;
   render();
 }
-
-function speak() {
-  speakPlace(PLACES[order[idx]]);
-}
+function speak() { speakPlace(PLACES[order[idx]]); }
 
 card.addEventListener("click", () => setFlipped(!flipped));
 $("next").addEventListener("click", next);
@@ -270,6 +337,7 @@ document.addEventListener("keydown", e => {
 });
 
 render();
+setTimeout(() => map.invalidateSize(), 100);
 </script>
 </body>
 </html>
