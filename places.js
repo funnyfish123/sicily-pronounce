@@ -258,3 +258,16 @@ if ("speechSynthesis" in window) {
   window.speechSynthesis.getVoices();
   window.speechSynthesis.onvoiceschanged = () => {};
 }
+
+// Explicitly expose for inline scripts in other pages.
+window.PLACES = PLACES;
+window.DEFAULT_PLACES = DEFAULT_PLACES;
+window.COUNTRY_NAME = COUNTRY_NAME;
+window.COUNTRY_FLAG = COUNTRY_FLAG;
+window.flagFor = flagFor;
+window.speakName = speakName;
+window.speakPlace = speakPlace;
+window.loadCustom = loadCustom;
+window.saveCustom = saveCustom;
+window.loadHidden = loadHidden;
+window.saveHidden = saveHidden;
