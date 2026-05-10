@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pronounce Sicily</title>
+<style>
+  :root {
+    --bg: #f5ede1;
+    --ink: #2b2118;
+    --accent: #b9482b;
+    --muted: #7a6a58;
+    --card: #fffaf2;
+    --shadow: 0 18px 40px rgba(80, 50, 20, 0.18);
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    font-family: ui-serif, Georgia, "Iowan Old Style", "Apple Garamond", serif;
+    background:
+      radial-gradient(1200px 600px at 80% -10%, #f3d6a8 0%, transparent 60%),
+      radial-gradient(900px 500px at -10% 110%, #e9c39b 0%, transparent 55%),
+      var(--bg);
+    color: var(--ink);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 20px 60px;
+    min-height: 100%;
+  }
+  header { text-align: center; margin-bottom: 18px; }
+  h1 {
+    margin: 0;
+    font-size: clamp(28px, 4vw, 40px);
+    letter-spacing: 0.02em;
+  }
+  .sub {
+    color: var(--muted);
+    font-style: italic;
+    margin-top: 6px;
+    font-size: 14px;
+  }
+  .progress {
+    color: var(--muted);
+    font-variant: small-caps;
+    letter-spacing: 0.1em;
+    margin: 14px 0 18px;
+    font-size: 13px;
+  }
+  .scene {
+    width: min(540px, 92vw);
+    perspective: 1400px;
+  }
+  .card {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 5 / 3;
+    transform-style: preserve-3d;
+    transition: transform 0.6s cubic-bezier(.2,.8,.2,1);
+    cursor: pointer;
+  }
+  .card.flipped { transform: rotateY(180deg); }
+  .face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    background: var(--card);
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 28px;
+    text-align: center;
+  }
+  .face.back { transform: rotateY(180deg); }
+  .place {
+    font-size: clamp(30px, 6vw, 52px);
+    margin: 0;
+    line-height: 1.1;
+  }
+  .hint {
+    color: var(--muted);
+    margin-top: 12px;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .phonetic {
+    font-size: clamp(22px, 4.4vw, 36px);
+    color: var(--accent);
+    margin: 0 0 10px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  .ipa {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 14px;
+  }
+  .note {
+    font-size: 14px;
+    color: var(--ink);
+    max-width: 90%;
+    line-height: 1.4;
+  }
+  .controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 22px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  button {
+    font: inherit;
+    background: var(--ink);
+    color: var(--bg);
+    border: none;
+    border-radius: 999px;
+    padding: 12px 22px;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: transform 0.1s ease, background 0.2s ease;
+  }
+  button.ghost {
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--ink);
+  }
+  button.accent { background: var(--accent); }
+  button:hover { transform: translateY(-1px); }
+  button:active { transform: translateY(0); }
+  footer {
+    margin-top: 28px;
+    color: var(--muted);
+    font-size: 12px;
+    text-align: center;
+  }
+  kbd {
+    background: #fffaf2;
+    border: 1px solid #d8c8b1;
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 11px;
+    font-family: ui-monospace, monospace;
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Pronounce Sicily</h1>
+  <div class="sub">click the card to flip · press <kbd>Space</kbd> to flip · <kbd>→</kbd> next · <kbd>←</kbd> previous</div>
+</header>
+
+<div class="progress" id="progress">1 / 8</div>
+
+<div class="scene">
+  <div class="card" id="card">
+    <div class="face front">
+      <h2 class="place" id="place">—</h2>
+      <div class="hint">tap to reveal</div>
+    </div>
+    <div class="face back">
+      <p class="phonetic" id="phonetic">—</p>
+      <div class="ipa" id="ipa"></div>
+      <div class="note" id="note"></div>
+    </div>
+  </div>
+</div>
+
+<div class="controls">
+  <button class="ghost" id="prev">← Prev</button>
+  <button class="accent" id="speak">🔊 Hear it</button>
+  <button id="next">Next →</button>
+  <button class="ghost" id="shuffle">Shuffle</button>
+</div>
+
+<footer>Italian pronunciation. Audio uses your browser's Italian voice when available.</footer>
+
+<script>
+const PLACES = [
+  {
+    name: "Catania",
+    phonetic: "kah-TAH-nyah",
+    ipa: "/kaˈtaːnja/",
+    note: "Stress on the second syllable. The 'gn'-like sound here is just 'nya' — soft."
+  },
+  {
+    name: "Taormina",
+    phonetic: "tah-or-MEE-nah",
+    ipa: "/taorˈmiːna/",
+    note: "Four syllables: ta-or-MEE-na. Don't blend the 'ao' — keep both vowels."
+  },
+  {
+    name: "Siracusa",
+    phonetic: "see-rah-KOO-zah",
+    ipa: "/siraˈkuːza/",
+    note: "Italian 'c' before 'u' is hard like 'k'. The 's' between vowels softens to 'z'."
+  },
+  {
+    name: "Ortigia",
+    phonetic: "or-TEE-jah",
+    ipa: "/orˈtiːdʒa/",
+    note: "The 'gi' makes a soft 'j' sound, like the 'g' in 'gem'. Island in Siracusa."
+  },
+  {
+    name: "Noto",
+    phonetic: "NOH-toh",
+    ipa: "/ˈnɔːto/",
+    note: "Easy: two clean syllables. Open 'o' in the first, closed in the second."
+  },
+  {
+    name: "Ragusa",
+    phonetic: "rah-GOO-zah",
+    ipa: "/raˈɡuːza/",
+    note: "Hard 'g' (before 'u'). The 's' becomes 'z' between vowels."
+  },
+  {
+    name: "Agrigento",
+    phonetic: "ah-gree-JEN-toh",
+    ipa: "/aɡriˈdʒɛnto/",
+    note: "The 'gi' before 'e' is soft — 'jen' like 'gentle'. Stress on JEN."
+  },
+  {
+    name: "Scala dei Turchi",
+    phonetic: "SKAH-lah day TOOR-kee",
+    ipa: "/ˈskaːla dei ˈturki/",
+    note: "'Stairs of the Turks'. 'ch' in Italian is hard 'k'. 'dei' rhymes with 'day'."
+  }
+];
+
+let order = PLACES.map((_, i) => i);
+let idx = 0;
+let flipped = false;
+
+const $ = id => document.getElementById(id);
+const card = $("card");
+
+function render() {
+  const p = PLACES[order[idx]];
+  $("place").textContent = p.name;
+  $("phonetic").textContent = p.phonetic;
+  $("ipa").textContent = p.ipa;
+  $("note").textContent = p.note;
+  $("progress").textContent = `${idx + 1} / ${order.length}`;
+  setFlipped(false);
+}
+
+function setFlipped(v) {
+  flipped = v;
+  card.classList.toggle("flipped", flipped);
+}
+
+function next() {
+  idx = (idx + 1) % order.length;
+  render();
+}
+function prev() {
+  idx = (idx - 1 + order.length) % order.length;
+  render();
+}
+function shuffle() {
+  for (let i = order.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [order[i], order[j]] = [order[j], order[i]];
+  }
+  idx = 0;
+  render();
+}
+
+function speak() {
+  const p = PLACES[order[idx]];
+  if (!("speechSynthesis" in window)) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(p.name);
+  u.lang = "it-IT";
+  u.rate = 0.85;
+  const voices = window.speechSynthesis.getVoices();
+  const it = voices.find(v => v.lang && v.lang.toLowerCase().startsWith("it"));
+  if (it) u.voice = it;
+  window.speechSynthesis.speak(u);
+}
+
+card.addEventListener("click", () => setFlipped(!flipped));
+$("next").addEventListener("click", next);
+$("prev").addEventListener("click", prev);
+$("speak").addEventListener("click", e => { e.stopPropagation(); speak(); });
+$("shuffle").addEventListener("click", shuffle);
+
+document.addEventListener("keydown", e => {
+  if (e.key === " ") { e.preventDefault(); setFlipped(!flipped); }
+  else if (e.key === "ArrowRight") next();
+  else if (e.key === "ArrowLeft") prev();
+  else if (e.key.toLowerCase() === "s") speak();
+});
+
+if ("speechSynthesis" in window) {
+  window.speechSynthesis.getVoices();
+  window.speechSynthesis.onvoiceschanged = () => {};
+}
+
+render();
+</script>
+</body>
+</html>
