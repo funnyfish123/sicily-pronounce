@@ -128,10 +128,17 @@
     text-transform: uppercase;
   }
   .phonetic {
-    font-size: clamp(22px, 4.4vw, 36px);
-    color: var(--accent);
-    margin: 0 0 10px;
+    font-size: clamp(20px, 3.6vw, 30px);
+    color: var(--muted);
+    margin: 14px 0 0;
     font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    letter-spacing: 0.02em;
+  }
+  .stress {
+    color: var(--accent);
+    font-weight: 600;
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 1px;
   }
   .ipa {
     color: var(--muted);
@@ -228,12 +235,12 @@
       <span class="country" id="country">—</span>
       <span class="flag" id="flag">🏳️</span>
       <h2 class="place" id="place">—</h2>
-      <div class="hint">tap to reveal</div>
+      <p class="phonetic" id="phonetic">—</p>
+      <div class="hint">tap for more</div>
     </div>
     <div class="face back">
       <span class="country" id="country2">—</span>
       <span class="flag" id="flag2">🏳️</span>
-      <p class="phonetic" id="phonetic">—</p>
       <div class="ipa" id="ipa"></div>
       <div class="note" id="note"></div>
     </div>
@@ -274,10 +281,17 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 const pinIcon = L.divIcon({ className: "", html: '<div class="pin"></div>', iconSize: [18, 18], iconAnchor: [9, 9] });
 const marker = L.marker([42, 13], { icon: pinIcon }).addTo(map);
 
+function styleStress(phonetic) {
+  return phonetic
+    .split(/(\s|-)/)
+    .map(part => /^[A-Z]{2,}$/.test(part) ? `<span class="stress">${part}</span>` : part)
+    .join("");
+}
+
 function render() {
   const p = PLACES[order[idx]];
   $("place").textContent = p.name;
-  $("phonetic").textContent = p.phonetic;
+  $("phonetic").innerHTML = styleStress(p.phonetic);
   $("ipa").textContent = p.ipa || "";
   $("note").textContent = p.note || "";
   $("flag").textContent = COUNTRY_FLAG[p.country] || "🏳️";
