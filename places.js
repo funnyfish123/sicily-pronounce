@@ -167,12 +167,54 @@ const PLACES = [
     lat: 47.3769, lng: 8.5417, country: "CH" }
 ];
 
-const COUNTRY_FLAG = {
-  IT: "🇮🇹", MT: "🇲🇹", SI: "🇸🇮", CH: "🇨🇭", SM: "🇸🇲"
-};
 const COUNTRY_NAME = {
-  IT: "Italy", MT: "Malta", SI: "Slovenia", CH: "Switzerland", SM: "San Marino"
+  IT: "Italy", MT: "Malta", SI: "Slovenia", CH: "Switzerland", SM: "San Marino",
+  FR: "France", ES: "Spain", DE: "Germany", AT: "Austria", GR: "Greece",
+  PT: "Portugal", NL: "Netherlands", BE: "Belgium", HR: "Croatia",
+  GB: "United Kingdom", IE: "Ireland", US: "United States", CA: "Canada",
+  JP: "Japan", CN: "China", KR: "South Korea", TH: "Thailand", VN: "Vietnam",
+  MX: "Mexico", AR: "Argentina", BR: "Brazil", AU: "Australia", NZ: "New Zealand",
+  TR: "Turkey", EG: "Egypt", MA: "Morocco", IS: "Iceland", NO: "Norway",
+  SE: "Sweden", DK: "Denmark", FI: "Finland", PL: "Poland", CZ: "Czechia",
+  HU: "Hungary", RO: "Romania", IL: "Israel", AE: "UAE", IN: "India"
 };
+function flagFor(cc) {
+  if (!cc || cc.length !== 2) return "🏳️";
+  return cc.toUpperCase().replace(/./g, c => String.fromCodePoint(0x1F1A5 + c.charCodeAt(0)));
+}
+const COUNTRY_FLAG = new Proxy({}, { get: (_, cc) => flagFor(cc) });
+
+// — custom places persisted in localStorage —
+const CUSTOM_KEY = "pronounce-custom-places-v1";
+const HIDDEN_KEY = "pronounce-hidden-defaults-v1";
+
+function loadCustom() {
+  try {
+    const raw = localStorage.getItem(CUSTOM_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+function saveCustom(list) {
+  localStorage.setItem(CUSTOM_KEY, JSON.stringify(list));
+}
+function loadHidden() {
+  try {
+    const raw = localStorage.getItem(HIDDEN_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+function saveHidden(list) {
+  localStorage.setItem(HIDDEN_KEY, JSON.stringify(list));
+}
+
+const DEFAULT_PLACES = PLACES.slice();
+{
+  const hidden = new Set(loadHidden());
+  const visible = DEFAULT_PLACES.filter(p => !hidden.has(p.name));
+  const custom = loadCustom().map(p => ({ ...p, custom: true }));
+  PLACES.length = 0;
+  PLACES.push(...visible, ...custom);
+}
 
 function pickVoice(lang) {
   const voices = (window.speechSynthesis && window.speechSynthesis.getVoices()) || [];

@@ -47,12 +47,13 @@
     font-size: 14px;
     margin-top: 2px;
   }
-  .nav { margin-top: 8px; font-size: 13px; }
+  .nav { margin-top: 10px; font-size: 14px; }
   .nav a {
     color: var(--accent);
     text-decoration: none;
     border-bottom: 1px dotted var(--accent);
     letter-spacing: 0.04em;
+    margin: 0 8px;
   }
   .nav a:hover { color: var(--ink); border-color: var(--ink); }
 
@@ -165,8 +166,11 @@
 <body>
 <header>
   <h1>Pronounce</h1>
-  <div class="tagline">all places · click a row to fly there</div>
-  <nav class="nav"><a href="index.html">← back to flashcards</a></nav>
+  <div class="tagline">all places · click a row to play it</div>
+  <nav class="nav">
+    <a href="index.html">flashcards</a>
+    <a href="manage.html">add or delete</a>
+  </nav>
 </header>
 
 <div class="layout">
@@ -236,7 +240,6 @@
       if (pin) pin.classList.add("active");
     }
     map.flyTo([PLACES[i].lat, PLACES[i].lng], 11, { duration: 1.6 });
-    rows[i].scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
 
   // Fit to all markers on initial load.

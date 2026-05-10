@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Manage · Pronounce</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4ead0;
+    --ink: #0e3a6b;
+    --accent: #d97824;
+    --pop: #c64f3a;
+    --sea: #2a8a8a;
+    --muted: #6b7d94;
+    --card: #fffdf6;
+    --shadow: 0 10px 22px rgba(14, 58, 107, 0.12);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    font-family: "Lora", ui-serif, Georgia, serif;
+    background:
+      radial-gradient(1100px 550px at 85% -10%, #f4d35e 0%, transparent 55%),
+      radial-gradient(900px 600px at -10% 110%, #2a8a8a 0%, transparent 50%),
+      radial-gradient(700px 400px at 110% 90%, #c64f3a 0%, transparent 55%),
+      var(--bg);
+    color: var(--ink);
+    padding: 32px 20px 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  header { text-align: center; margin-bottom: 22px; }
+  h1 {
+    margin: 0;
+    font-size: clamp(34px, 5vw, 48px);
+    font-weight: 600;
+  }
+  .nav { margin-top: 8px; font-size: 14px; }
+  .nav a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--accent);
+    margin: 0 8px;
+  }
+  .nav a:hover { color: var(--ink); border-color: var(--ink); }
+
+  main { width: min(720px, 96vw); display: flex; flex-direction: column; gap: 28px; }
+
+  section {
+    background: var(--card);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    padding: 24px 26px;
+  }
+  section h2 {
+    margin: 0 0 4px;
+    font-size: 22px;
+    font-weight: 600;
+  }
+  .help {
+    color: var(--muted);
+    font-size: 14px;
+    margin: 0 0 18px;
+  }
+
+  form { display: grid; gap: 14px; }
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 14px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+  label .req { color: var(--pop); margin-left: 2px; }
+  input, textarea, select {
+    font: inherit;
+    font-size: 16px;
+    color: var(--ink);
+    background: #fff;
+    border: 1px solid #d8c8b1;
+    border-radius: 10px;
+    padding: 10px 12px;
+    width: 100%;
+  }
+  input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(217,120,36,0.18);
+  }
+  textarea { min-height: 90px; resize: vertical; line-height: 1.4; }
+  .row2 { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: end; }
+  button {
+    font: inherit;
+    font-size: 15px;
+    background: var(--accent);
+    color: #fffdf6;
+    border: none;
+    border-radius: 999px;
+    padding: 11px 22px;
+    cursor: pointer;
+    transition: transform 0.1s ease, background 0.2s ease;
+    letter-spacing: 0.03em;
+  }
+  button:hover { background: var(--pop); transform: translateY(-1px); }
+  button:active { transform: translateY(0); }
+  button.ghost {
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--ink);
+  }
+  button.ghost:hover { background: var(--ink); color: var(--bg); }
+  button.danger { background: var(--pop); }
+  button.danger:hover { background: var(--ink); }
+  .submit-row { display: flex; justify-content: flex-end; gap: 10px; margin-top: 6px; }
+  .geo-status {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 2px;
+    min-height: 1.2em;
+  }
+  .geo-status.ok { color: var(--sea); }
+  .geo-status.err { color: var(--pop); }
+
+  ul.places-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  ul.places-list li {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 12px;
+    align-items: center;
+    padding: 10px 14px;
+    background: #fffaee;
+    border-radius: 10px;
+    border: 1px solid #ead9b8;
+  }
+  ul.places-list li.custom { border-color: var(--accent); background: #fff5e6; }
+  .pl-flag { font-size: 22px; line-height: 1; }
+  .pl-name { font-size: 17px; font-weight: 500; }
+  .pl-phon {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 2px;
+  }
+  .pl-actions { display: flex; gap: 6px; }
+  .pl-actions button {
+    font-size: 12px;
+    padding: 6px 14px;
+    border-radius: 999px;
+  }
+
+  details summary {
+    cursor: pointer;
+    font-weight: 500;
+    color: var(--accent);
+    user-select: none;
+  }
+  details[open] summary { margin-bottom: 12px; }
+
+  .empty {
+    color: var(--muted);
+    font-style: italic;
+    font-size: 15px;
+    padding: 12px 0;
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Manage</h1>
+  <nav class="nav">
+    <a href="index.html">flashcards</a>
+    <a href="all.html">all places</a>
+  </nav>
+</header>
+
+<main>
+  <section>
+    <h2>Add a flashcard</h2>
+    <p class="help">Type a place name, hit "Look up" to find it on the map, then add the pronunciation. Saved in your browser only.</p>
+    <form id="add-form" autocomplete="off">
+      <label>
+        Place name <span class="req">*</span>
+        <div class="row2">
+          <input id="f-name" type="text" placeholder="e.g. Florence, Italy" required>
+          <button type="button" id="f-lookup" class="ghost">Look up</button>
+        </div>
+        <div class="geo-status" id="geo-status"></div>
+      </label>
+      <label>
+        Pronunciation <span class="req">*</span>
+        <input id="f-phonetic" type="text" placeholder="e.g. FLOR-ents (CAPS = stressed syllable)" required>
+      </label>
+      <label>
+        Tips (one per line)
+        <textarea id="f-tips" placeholder="Stress on FLOR.&#10;The 'c' before 'e' is soft 's'."></textarea>
+      </label>
+      <label>
+        Voice language
+        <select id="f-lang">
+          <option value="it-IT">🇮🇹 Italian (it-IT)</option>
+          <option value="en-US">🇬🇧 English (en-US)</option>
+          <option value="fr-FR">🇫🇷 French (fr-FR)</option>
+          <option value="es-ES">🇪🇸 Spanish (es-ES)</option>
+          <option value="de-DE">🇩🇪 German (de-DE)</option>
+          <option value="de-CH">🇨🇭 Swiss German (de-CH)</option>
+          <option value="sl-SI">🇸🇮 Slovenian (sl-SI)</option>
+          <option value="pt-PT">🇵🇹 Portuguese (pt-PT)</option>
+          <option value="el-GR">🇬🇷 Greek (el-GR)</option>
+          <option value="ja-JP">🇯🇵 Japanese (ja-JP)</option>
+        </select>
+      </label>
+      <input type="hidden" id="f-lat">
+      <input type="hidden" id="f-lng">
+      <input type="hidden" id="f-country">
+      <div class="submit-row">
+        <button type="button" id="f-reset" class="ghost">Clear</button>
+        <button type="submit">Add flashcard</button>
+      </div>
+    </form>
+  </section>
+
+  <section>
+    <h2>Your custom flashcards</h2>
+    <p class="help" id="custom-help">Anything you've added shows up here. Click delete to remove.</p>
+    <ul class="places-list" id="custom-list"></ul>
+  </section>
+
+  <section>
+    <details>
+      <summary id="default-summary">Built-in flashcards</summary>
+      <p class="help">These come with the site. You can hide ones you don't need; "restore" brings them back.</p>
+      <ul class="places-list" id="default-list"></ul>
+    </details>
+  </section>
+</main>
+
+<script src="places.js"></script>
+<script>
+  const $ = id => document.getElementById(id);
+
+  function detectCountryLang(cc) {
+    if (!cc) return "it-IT";
+    return {
+      IT: "it-IT", SM: "it-IT", CH: "de-CH", DE: "de-DE", AT: "de-DE",
+      FR: "fr-FR", ES: "es-ES", PT: "pt-PT", SI: "sl-SI", GR: "el-GR",
+      MT: "en-US", GB: "en-US", IE: "en-US", US: "en-US",
+      JP: "ja-JP"
+    }[cc.toUpperCase()] || "en-US";
+  }
+
+  // ── Geocode lookup via Nominatim (OpenStreetMap) ────────────────────
+  $("f-lookup").addEventListener("click", lookup);
+  $("f-name").addEventListener("keydown", e => {
+    if (e.key === "Enter") { e.preventDefault(); lookup(); }
+  });
+
+  async function lookup() {
+    const status = $("geo-status");
+    const name = $("f-name").value.trim();
+    if (!name) { status.textContent = "Type a place name first."; status.className = "geo-status err"; return; }
+    status.textContent = "Looking up…"; status.className = "geo-status";
+    try {
+      const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=1&q=${encodeURIComponent(name)}`, {
+        headers: { "Accept-Language": "en" }
+      });
+      const data = await r.json();
+      if (!data.length) {
+        status.textContent = "No result. Try adding the country, e.g. 'Florence, Italy'."; status.className = "geo-status err";
+        return;
+      }
+      const hit = data[0];
+      const cc = (hit.address && (hit.address.country_code || "")).toUpperCase();
+      $("f-lat").value = hit.lat;
+      $("f-lng").value = hit.lon;
+      $("f-country").value = cc;
+      $("f-lang").value = detectCountryLang(cc);
+      const flag = flagFor(cc);
+      const country = COUNTRY_NAME[cc] || hit.address?.country || cc;
+      status.innerHTML = `${flag} Found: ${hit.display_name.split(",").slice(0, 3).join(",")} <span style="color:var(--muted)">(${country})</span>`;
+      status.className = "geo-status ok";
+    } catch (e) {
+      status.textContent = "Lookup failed. Check your connection.";
+      status.className = "geo-status err";
+    }
+  }
+
+  // ── Add form ───────────────────────────────────────────────────────
+  $("add-form").addEventListener("submit", e => {
+    e.preventDefault();
+    const name = $("f-name").value.trim();
+    const phonetic = $("f-phonetic").value.trim();
+    if (!name || !phonetic) return;
+    const lat = parseFloat($("f-lat").value);
+    const lng = parseFloat($("f-lng").value);
+    if (Number.isNaN(lat) || Number.isNaN(lng)) {
+      const status = $("geo-status");
+      status.textContent = "Click 'Look up' first to find the location.";
+      status.className = "geo-status err";
+      return;
+    }
+    const tips = $("f-tips").value.split("\n").map(s => s.trim()).filter(Boolean);
+    const place = {
+      name,
+      phonetic,
+      lang: $("f-lang").value,
+      tips,
+      lat, lng,
+      country: $("f-country").value || ""
+    };
+    const list = loadCustom();
+    list.push(place);
+    saveCustom(list);
+    $("add-form").reset();
+    $("f-lat").value = ""; $("f-lng").value = ""; $("f-country").value = "";
+    $("geo-status").textContent = ""; $("geo-status").className = "geo-status";
+    renderLists();
+  });
+  $("f-reset").addEventListener("click", () => {
+    $("add-form").reset();
+    $("geo-status").textContent = ""; $("geo-status").className = "geo-status";
+  });
+
+  // ── Render lists ───────────────────────────────────────────────────
+  function placeRow(p, opts) {
+    const li = document.createElement("li");
+    if (opts.custom) li.classList.add("custom");
+    li.innerHTML = `
+      <span class="pl-flag"></span>
+      <div>
+        <div class="pl-name"></div>
+        <div class="pl-phon"></div>
+      </div>
+      <div class="pl-actions"></div>
+    `;
+    li.querySelector(".pl-flag").textContent = flagFor(p.country);
+    li.querySelector(".pl-name").textContent = p.name;
+    li.querySelector(".pl-phon").textContent = p.phonetic;
+    const actions = li.querySelector(".pl-actions");
+    if (opts.custom) {
+      const del = document.createElement("button");
+      del.className = "danger";
+      del.textContent = "Delete";
+      del.addEventListener("click", () => {
+        if (!confirm(`Delete "${p.name}"?`)) return;
+        const list = loadCustom().filter(x => x.name !== p.name);
+        saveCustom(list);
+        renderLists();
+      });
+      actions.appendChild(del);
+    } else {
+      const hidden = loadHidden().includes(p.name);
+      const btn = document.createElement("button");
+      btn.className = hidden ? "ghost" : "ghost";
+      btn.textContent = hidden ? "Restore" : "Hide";
+      btn.addEventListener("click", () => {
+        let list = loadHidden();
+        if (hidden) list = list.filter(n => n !== p.name);
+        else list.push(p.name);
+        saveHidden(list);
+        renderLists();
+      });
+      actions.appendChild(btn);
+    }
+    return li;
+  }
+
+  function renderLists() {
+    const customEl = $("custom-list");
+    const defaultEl = $("default-list");
+    customEl.innerHTML = "";
+    defaultEl.innerHTML = "";
+    const custom = loadCustom();
+    const hidden = new Set(loadHidden());
+    if (custom.length === 0) {
+      customEl.innerHTML = '<li class="empty">No custom flashcards yet. Add one above.</li>';
+    } else {
+      custom.forEach(p => customEl.appendChild(placeRow(p, { custom: true })));
+    }
+    DEFAULT_PLACES.forEach(p => defaultEl.appendChild(placeRow(p, { custom: false })));
+    const visibleDefaults = DEFAULT_PLACES.length - hidden.size;
+    $("default-summary").textContent = `Built-in flashcards (${visibleDefaults} of ${DEFAULT_PLACES.length} visible)`;
+    $("custom-help").textContent = custom.length
+      ? `${custom.length} custom flashcard${custom.length === 1 ? "" : "s"}. Click delete to remove.`
+      : "Anything you've added shows up here. Click delete to remove.";
+  }
+
+  renderLists();
+</script>
+</body>
+</html>
