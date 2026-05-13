@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "name": "Venezuela",
+    "phonetic": "VE-ne-zue-la",
+    "lang": "en-US",
+    "tips": [],
+    "lat": 8.0018709,
+    "lng": -66.1109318,
+    "country": "VE"
+  }
+]
